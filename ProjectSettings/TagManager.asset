@@ -1,0 +1,59 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!78 &1
+TagManager:
+  serializedVersion: 3
+  tags:
+  - SolidGround
+  - Poison
+  - WinPlatform
+  - Breakable
+  - Wall
+  layers:
+  - Default
+  - TransparentFX
+  - Ignore Raycast
+  - Player
+  - Water
+  - UI
+  - Item
+  - Wall
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  m_SortingLayers:
+  - name: Player
+    uniqueID: 274742581
+    locked: 0
+  - name: Obstacle1
+    uniqueID: 739118543
+    locked: 0
+  - name: Default
+    uniqueID: 0
+    locked: 0
+  - name: Tutorial
+    uniqueID: 2312747751
+    locked: 0
+  m_RenderingLayers:
+  - Default
