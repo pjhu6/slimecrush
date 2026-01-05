@@ -26,6 +26,7 @@ public class GameOverController : MonoBehaviour
     {
         // Reload the current scene to restart the game
         GameManager.Instance.Resume();
+        gameOverUI.SetActive(false);
         UnityEngine.SceneManagement.SceneManager.LoadScene("GameScene");
     }
 }

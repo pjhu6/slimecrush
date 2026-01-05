@@ -31,6 +31,8 @@ public class PlayerManager : MonoBehaviour
     [SerializeField]
     private bool isGrappling;
     [SerializeField]
+    private bool isGrappleAvailable;
+    [SerializeField]
     private bool hookAttached;
     [SerializeField]
     private Vector2 hookPoint;
@@ -105,6 +107,7 @@ public class PlayerManager : MonoBehaviour
 
         if (isGrounded)
         {
+            isGrappleAvailable = true;
             if (!wasGrounded)
             {
                 HandleLanding();
@@ -161,7 +164,7 @@ public class PlayerManager : MonoBehaviour
         }
 
         // Release grapple
-        if (isGrappling && Input.GetButtonDown("Jump"))
+        if (isGrappling && hookAttached && Input.GetButtonDown("Jump"))
         {
             ReleaseGrapple();
             velocity.y = jumpForce * 0.75f;
@@ -198,7 +201,7 @@ public class PlayerManager : MonoBehaviour
 
     private void GroundedMovement()
     {
-        if (isGrappling)
+        if (hookAttached)
         {
             return;
         }
@@ -216,7 +219,7 @@ public class PlayerManager : MonoBehaviour
 
     private void AirMovement()
     {
-        if (isGrappling)
+        if (hookAttached)
         {
             return;
         }
@@ -278,7 +281,7 @@ public class PlayerManager : MonoBehaviour
 
     private void ApplyGravity()
     {
-        if (isDashing || isGrappling)
+        if (isDashing || hookAttached)
         {
             // Disable gravity while dashing or grappling
             return;
@@ -518,6 +521,14 @@ public class PlayerManager : MonoBehaviour
 
     private void TryStartGrapple()
     {
+        if (isGrappling || !isGrappleAvailable)
+        {
+            return;
+        }
+
+        
+        isGrappleAvailable = false;
+
         Vector2 mouseWorld = Camera.main.ScreenToWorldPoint(Input.mousePosition);
         Vector2 origin = rb.position;
         Vector2 direction = (mouseWorld - origin).normalized;
@@ -533,7 +544,10 @@ public class PlayerManager : MonoBehaviour
 
         isGrappling = true;
 
-        if (hit.collider != null && !hit.collider.CompareTag("Wall"))
+        // Valid grapple: hit something, not a wall, AND hit the bottom of a collider
+        if (hit.collider != null &&
+            !hit.collider.CompareTag("Wall") &&
+            hit.normal.y < -0.5f)
         {
             hookAttached = true;
             hookPoint = hit.point;
@@ -544,12 +558,13 @@ public class PlayerManager : MonoBehaviour
         }
         else
         {
-            // Missed — still draw the rope
+            // Missed or hit side/top — still draw the rope, but don’t attach
             hookAttached = false;
             hookVisualPoint = origin + direction * hookMaxDistance;
             StartCoroutine(RetractHook());
         }
     }
+
 
 
     private void GrappleMovement()
@@ -616,6 +631,7 @@ public class PlayerManager : MonoBehaviour
     private IEnumerator HandleWallCollision()
     {
         yield return new WaitForSeconds(0.5f);
+        GameManager.Instance.Resume();
         UnityEngine.SceneManagement.SceneManager.LoadScene("WinScene");
     }
 }

@@ -5,7 +5,7 @@ using UnityEngine.SceneManagement;
 public class CutsceneManager : MonoBehaviour
 {
     public string videoUrl;
-    private VideoPlayer videoPlayer;
+    public VideoPlayer videoPlayer;
 
     void Awake()
     {
@@ -16,18 +16,21 @@ public class CutsceneManager : MonoBehaviour
             videoPlayer.playOnAwake = false;
             videoPlayer.Prepare();
 
-            videoPlayer.loopPointReached += OnVideoFinished;
+            
             videoPlayer.prepareCompleted += OnVideoPrepared;
         }
     }
 
     void OnVideoPrepared(VideoPlayer vp)
     {
+        Debug.Log("Video prepared, starting playback.");
         videoPlayer.Play();
+        videoPlayer.loopPointReached += OnVideoFinished;
     }
 
     void OnVideoFinished(VideoPlayer vp)
     {
+        Debug.Log("Video finished, loading main menu.");
         SceneManager.LoadScene("MainMenuScene");
     }
 }

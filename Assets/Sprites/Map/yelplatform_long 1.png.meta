@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: 8335a6221e0776746a2cebe9cb2d4ddf
+guid: 901c815c694ab2a4497d0fdfa2cc74a5
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -8953073072798572213
-    second: hearttop_0
+      213: 4591283448171988534
+    second: yelplatform_long 1_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -40,18 +40,18 @@ TextureImporter:
     filterMode: 1
     aniso: 1
     mipBias: 0
-    wrapU: 1
-    wrapV: 1
-    wrapW: 1
+    wrapU: 0
+    wrapV: 0
+    wrapW: 0
   nPOTScale: 0
   lightmap: 0
   compressionQuality: 50
   spriteMode: 2
   spriteExtrude: 1
-  spriteMeshType: 1
+  spriteMeshType: 0
   alignment: 0
   spritePivot: {x: 0.5, y: 0.5}
-  spritePixelsToUnits: 90
+  spritePixelsToUnits: 85
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
   spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
@@ -126,13 +126,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: hearttop_0
+      name: yelplatform_long 1_0
       rect:
         serializedVersion: 2
-        x: 225
-        y: 277
-        width: 351
-        height: 210
+        x: 124
+        y: 212
+        width: 566
+        height: 58
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -141,8 +141,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: b41e9b7c97b40c380800000000000000
-      internalID: -8953073072798572213
+      spriteID: 6360c6f68f387bf30800000000000000
+      internalID: 4591283448171988534
       vertices: []
       indices: 
       edges: []
@@ -161,7 +161,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      hearttop_0: -8953073072798572213
+      yelplatform_long 1_0: 4591283448171988534
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

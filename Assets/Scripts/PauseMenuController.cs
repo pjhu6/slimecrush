@@ -4,6 +4,12 @@ using UnityEngine;
 public class PauseMenuController : MonoBehaviour
 {
     public GameObject pauseUI;
+    public AudioSource musicSource;
+
+    void OnEnable()
+    {
+        musicSource.Play();
+    }
 
     void Start()
     {
@@ -36,11 +42,21 @@ public class PauseMenuController : MonoBehaviour
     {
         // Reload the current scene to restart the game
         GameManager.Instance.Resume();
+        pauseUI.SetActive(false);
+
+        ClockManager clockManager = FindFirstObjectByType<ClockManager>();
+        if (clockManager != null)
+        {
+            clockManager.ResetTimer();
+        }
+
         UnityEngine.SceneManagement.SceneManager.LoadScene("GameScene");
     }
 
     public void QuitToMainMenu()
     {
+        musicSource.Stop();
+        pauseUI.SetActive(false);
         GameManager.Instance.Resume();
         UnityEngine.SceneManagement.SceneManager.LoadScene("MainMenuScene");
     }
