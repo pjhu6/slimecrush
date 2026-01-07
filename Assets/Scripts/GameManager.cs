@@ -7,9 +7,6 @@ public class GameManager : MonoBehaviour
 
     public GameState CurrentState { get; private set; } = GameState.Playing;
 
-    private const string BestScoreKey = "BestScore";
-    public int BestScore { get; private set; }
-
     private ClockManager clockManager;
 
     private void Awake()
@@ -23,27 +20,6 @@ public class GameManager : MonoBehaviour
         clockManager = FindFirstObjectByType<ClockManager>();
 
         Instance = this;
-
-        // Load best score on startup
-        BestScore = PlayerPrefs.GetInt(BestScoreKey, 0);
-    }
-
-    // Call this when a run ends or score changes
-    public void TrySetBestScore(int score)
-    {
-        if (score > BestScore)
-        {
-            BestScore = score;
-            PlayerPrefs.SetInt(BestScoreKey, BestScore);
-            PlayerPrefs.Save(); // Important for WebGL
-        }
-    }
-
-    public void ResetBestScore()
-    {
-        BestScore = 0;
-        PlayerPrefs.DeleteKey(BestScoreKey);
-        PlayerPrefs.Save();
     }
 
     public void Pause()
@@ -79,15 +55,13 @@ public class GameManager : MonoBehaviour
         // Convert seconds → milliseconds (int-safe)
         int elapsedMilliseconds = Mathf.FloorToInt(clockManager.ElapsedTime * 1000f);
 
-        if (elapsedMilliseconds < BestScore)
+        if (!PersistenceManager.Instance.HasBestScore() || elapsedMilliseconds < PersistenceManager.Instance.GetBestScore())
         {
-            Debug.Log($"New best score: {elapsedMilliseconds} ms (old: {BestScore} ms)");
-            BestScore = elapsedMilliseconds;
-            PlayerPrefs.SetInt(BestScoreKey, BestScore);
-            PlayerPrefs.Save(); // WebGL-safe
+            Debug.Log("Setting new best score: " + elapsedMilliseconds + " ms, was: " + PersistenceManager.Instance.GetBestScore() + " ms");
+            PersistenceManager.Instance.SetBestScore(elapsedMilliseconds);
         }
         else {
-            Debug.Log($"Run complete: {elapsedMilliseconds} ms (best: {BestScore} ms)");
+            Debug.Log($"Run complete: {elapsedMilliseconds} ms (best: {PersistenceManager.Instance.GetBestScore()} ms)");
         }
     }
 }

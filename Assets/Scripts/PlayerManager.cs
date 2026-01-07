@@ -4,6 +4,10 @@ using System.Collections.Generic;
 
 public class PlayerManager : MonoBehaviour
 {
+    [Header("Debug")]
+    public bool isDebug = false;
+
+    [Header("Movement Parameters")]
     public float moveSpeed = 5f;
     public float maxJumpHeight = 2f;
     public float maxJumpTime = 0.75f; 
@@ -20,6 +24,8 @@ public class PlayerManager : MonoBehaviour
     public AudioClip dashSound;
     public AudioClip landingSound;
     public AudioClip deathSound;
+    public AudioClip victorySound;
+    public AudioClip grappleSound;
     private AudioSource audioSource;
 
     [Header("Grappling Hook")]
@@ -27,6 +33,9 @@ public class PlayerManager : MonoBehaviour
     public float hookPullSpeed = 15f;
     public LayerMask grappleLayer;
     public LineRenderer hookLine;
+
+    [Header("Camera")]
+    public Camera mainCamera;
 
     [SerializeField]
     private bool isGrappling;
@@ -60,6 +69,7 @@ public class PlayerManager : MonoBehaviour
     private bool isDashAvailable;
     [SerializeField]
     private bool facingRight;
+    private bool isVictoryStarted = false;
 
     [SerializeField]
     private bool isCrouched;
@@ -87,13 +97,24 @@ public class PlayerManager : MonoBehaviour
         };
 
         audioSource = GetComponent<AudioSource>();
+
+        // When debug, set y position to 101
+        if (isDebug)
+        {
+            transform.position = new Vector2(transform.position.x, 101f);
+        }
     }
 
     private void Update()
     {
         if (GameManager.Instance.CurrentState == GameState.Victory)
         {
-            WalkRightUntilWall();
+            if (!isVictoryStarted)
+            {
+                audioSource.PlayOneShot(victorySound);
+                isVictoryStarted = true;
+            }
+            HandleVictory();
             return;
         }
 
@@ -135,6 +156,13 @@ public class PlayerManager : MonoBehaviour
         // Update sprite based on current state
         UpdateSprite();
         UpdateGrappleLine();
+    }
+
+    private void HandleVictory()
+    {
+        // zoom in on camera on victory
+        mainCamera.orthographicSize = Mathf.Lerp(mainCamera.orthographicSize, 3f, Time.deltaTime);
+        WalkRightUntilWall();
     }
 
     private void UpdateGrappleLine()
@@ -549,6 +577,7 @@ public class PlayerManager : MonoBehaviour
             !hit.collider.CompareTag("Wall") &&
             hit.normal.y < -0.5f)
         {
+            audioSource.PlayOneShot(grappleSound);
             hookAttached = true;
             hookPoint = hit.point;
             hookVisualPoint = hit.point;

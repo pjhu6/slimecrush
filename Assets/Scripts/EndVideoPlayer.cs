@@ -9,23 +9,25 @@ public class CutsceneManager : MonoBehaviour
 
     void Awake()
     {
-        videoPlayer = gameObject.AddComponent<VideoPlayer>();
-        if (videoPlayer)
-        {
-            videoPlayer.url = videoUrl;
-            videoPlayer.playOnAwake = false;
-            videoPlayer.Prepare();
+        videoPlayer.playOnAwake = false;
+        videoPlayer.source = VideoSource.Url;
+        videoPlayer.url = videoUrl;
 
-            
-            videoPlayer.prepareCompleted += OnVideoPrepared;
-        }
+        videoPlayer.audioOutputMode = VideoAudioOutputMode.Direct;
+        videoPlayer.EnableAudioTrack(0, true);
+        videoPlayer.SetDirectAudioVolume(0, 0.2f);
+
+        videoPlayer.prepareCompleted += OnVideoPrepared;
+        videoPlayer.loopPointReached += OnVideoFinished;
+
+        videoPlayer.Prepare();
     }
+
 
     void OnVideoPrepared(VideoPlayer vp)
     {
         Debug.Log("Video prepared, starting playback.");
         videoPlayer.Play();
-        videoPlayer.loopPointReached += OnVideoFinished;
     }
 
     void OnVideoFinished(VideoPlayer vp)

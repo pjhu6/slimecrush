@@ -5,6 +5,7 @@ public class ClockManager : MonoBehaviour
 {
     public TextMeshProUGUI clockText;
     public TextMeshProUGUI bestScoreText;
+    public TextMeshProUGUI playerNameText;
 
     private float elapsedTime;
 
@@ -13,6 +14,7 @@ public class ClockManager : MonoBehaviour
     void Start()
     {
         UpdateBestScoreDisplay();
+        UpdatePlayerNameDisplay();
     }
 
     void Update()
@@ -31,7 +33,7 @@ public class ClockManager : MonoBehaviour
 
     void UpdateBestScoreDisplay()
     {
-        int bestScoreMs = GameManager.Instance.BestScore;
+        int bestScoreMs = PersistenceManager.Instance.GetBestScore();
 
         if (bestScoreMs <= 0)
         {
@@ -40,6 +42,14 @@ public class ClockManager : MonoBehaviour
         }
 
         bestScoreText.text = "Best: " + FormatMilliseconds(bestScoreMs);
+    }
+
+    void UpdatePlayerNameDisplay()
+    {
+        Debug.Log("Updating player name display.");
+        string playerName = PersistenceManager.Instance.GetPlayerName();
+        Debug.Log("Player name retrieved: " + playerName);
+        playerNameText.text = "Player: " + playerName;
     }
 
     // Formats float seconds → MM:SS.xx

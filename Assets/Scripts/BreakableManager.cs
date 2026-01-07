@@ -5,6 +5,7 @@ public class BreakableManager : MonoBehaviour
 {
     public float shakeDelay = 0.5f;
     public float breakDelay = 1f;
+    public float respawnDelay = 2f;
     public float shakeMagnitude = 0.05f;
 
     private void OnCollisionEnter2D(Collision2D collision)
@@ -40,6 +41,19 @@ public class BreakableManager : MonoBehaviour
 
         transform.position = originalPosition; // Reset position after shaking
 
-        Destroy(gameObject);
+        // Instead of SetActive(false), disable only the visuals/colliders
+        GetComponent<SpriteRenderer>().enabled = false;
+        GetComponent<Collider2D>().enabled = false;
+
+        Debug.Log("After Breakable breaking...");
+
+        // Respawn
+        yield return new WaitForSeconds(respawnDelay);
+
+        // Re-enable the object
+        GetComponent<SpriteRenderer>().enabled = true;
+        GetComponent<Collider2D>().enabled = true;
+
+        Debug.Log("Breakable will respawn...");
     }
 }
