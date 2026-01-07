@@ -49,7 +49,7 @@ public class ClockManager : MonoBehaviour
         Debug.Log("Updating player name display.");
         string playerName = PersistenceManager.Instance.GetPlayerName();
         Debug.Log("Player name retrieved: " + playerName);
-        playerNameText.text = "Player: " + playerName;
+        playerNameText.text = playerName;
     }
 
     // Formats float seconds → MM:SS.xx

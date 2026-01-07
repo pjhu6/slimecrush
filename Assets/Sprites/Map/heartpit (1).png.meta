@@ -129,12 +129,12 @@ TextureImporter:
       name: heartpit (1)_0
       rect:
         serializedVersion: 2
-        x: 252
-        y: 59
-        width: 324
-        height: 226
+        x: 253
+        y: 60
+        width: 285
+        height: 223
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -151,7 +151,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 
+    spriteID: dc8d98e7de80d554a9dd8e47becc7c43
     internalID: 0
     vertices: []
     indices: 
