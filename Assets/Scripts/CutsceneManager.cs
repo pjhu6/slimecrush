@@ -23,6 +23,15 @@ public class CutsceneManager : MonoBehaviour
         videoPlayer.Prepare();
     }
 
+    void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.Space))
+        {
+            Debug.Log("Cutscene skipped by player.");
+            End();
+        }
+    }
+
 
     void OnVideoPrepared(VideoPlayer vp)
     {
@@ -33,6 +42,12 @@ public class CutsceneManager : MonoBehaviour
     void OnVideoFinished(VideoPlayer vp)
     {
         Debug.Log("Video finished, loading main menu.");
+        End();
+    }
+
+    private void End()
+    {
+        // TODO: move to next level or something
         SceneManager.LoadScene("MainMenuScene");
     }
 }

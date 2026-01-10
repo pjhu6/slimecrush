@@ -37,6 +37,7 @@ public class PlayerManager : MonoBehaviour
     [Header("Camera")]
     public Camera mainCamera;
 
+    [Header("Grapple State")]
     [SerializeField]
     private bool isGrappling;
     [SerializeField]
@@ -53,6 +54,7 @@ public class PlayerManager : MonoBehaviour
     
     private Rigidbody2D rb;
 
+    [Header("Player State")]
     [SerializeField]
     private Vector2 velocity;
     private float inputAxis;
@@ -69,12 +71,15 @@ public class PlayerManager : MonoBehaviour
     private bool isDashAvailable;
     [SerializeField]
     private bool facingRight;
-    private bool isVictoryStarted = false;
+    
 
     [SerializeField]
     private bool isCrouched;
     [SerializeField]
     private int apexState;
+
+    [Header("Victory State")]
+    [SerializeField] private bool isVictoryStarted = false;
 
     private SpriteRenderer[] spriteRenderers;
     private Dictionary<string, SpriteRenderer> spriteMap;
@@ -111,10 +116,9 @@ public class PlayerManager : MonoBehaviour
         {
             if (!isVictoryStarted)
             {
-                audioSource.PlayOneShot(victorySound);
                 isVictoryStarted = true;
+                StartCoroutine(VictorySequence());
             }
-            HandleVictory();
             return;
         }
 
@@ -156,13 +160,6 @@ public class PlayerManager : MonoBehaviour
         // Update sprite based on current state
         UpdateSprite();
         UpdateGrappleLine();
-    }
-
-    private void HandleVictory()
-    {
-        // zoom in on camera on victory
-        mainCamera.orthographicSize = Mathf.Lerp(mainCamera.orthographicSize, 3f, Time.deltaTime);
-        WalkRightUntilWall();
     }
 
     private void UpdateGrappleLine()
@@ -364,15 +361,9 @@ public class PlayerManager : MonoBehaviour
             if (transform.DotTest(collision.transform, Vector2.down) 
             && rb.Raycast(Vector2.down))  // check is grounded as well
             {
-                SetWin();
+                GameManager.Instance.Win();
             }
         }
-    }
-
-    private void SetWin()
-    {
-        GameManager.Instance.Win();
-        Debug.Log("You won!");
     }
 
     private void HandleDeath()
@@ -642,25 +633,30 @@ public class PlayerManager : MonoBehaviour
         ReleaseGrapple();
     }
 
-    private void WalkRightUntilWall()
+    private IEnumerator VictorySequence()
     {
-        velocity.y = 0f;
-        velocity.x = 2; // Keep moving right at set speed
+        // 1. Play victory sound
+        audioSource.PlayOneShot(victorySound);
 
-        if (IsHittingWall())
+        // 2. Walk right + zoom in until we hit the wall
+        while (!IsHittingWall())
         {
-            StartCoroutine(HandleWallCollision());
+            // Camera Zoom
+            mainCamera.orthographicSize = Mathf.Lerp(mainCamera.orthographicSize, 3f, Time.deltaTime);
+
+            // Move Right
+            velocity.y = 0f;
+            velocity.x = 2f;
+
+            Vector2 position = rb.position;
+            position += velocity * Time.deltaTime;
+            rb.MovePosition(position);
+
+            yield return null; 
         }
 
-        Vector2 position = rb.position;
-        position += velocity * Time.deltaTime;
-        rb.MovePosition(position);
-    }
-
-    private IEnumerator HandleWallCollision()
-    {
-        yield return new WaitForSeconds(0.5f);
-        GameManager.Instance.Resume();
-        UnityEngine.SceneManagement.SceneManager.LoadScene("WinScene");
+        // 3. The Wall has been hit - end the level
+        velocity = Vector2.zero;
+        GameManager.Instance.EndLevel();
     }
 }

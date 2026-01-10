@@ -1,5 +1,6 @@
 using TMPro;
 using UnityEngine;
+using System.Threading.Tasks;
 
 public class ClockManager : MonoBehaviour
 {
@@ -11,10 +12,10 @@ public class ClockManager : MonoBehaviour
 
     public float ElapsedTime => elapsedTime;
 
-    void Start()
+    async void Start()
     {
-        UpdateBestScoreDisplay();
         UpdatePlayerNameDisplay();
+        await UpdateBestScoreDisplay();
     }
 
     void Update()
@@ -31,17 +32,11 @@ public class ClockManager : MonoBehaviour
         clockText.text = "Current: " + FormatTime(elapsedTime);
     }
 
-    void UpdateBestScoreDisplay()
+    async Task UpdateBestScoreDisplay()
     {
-        int bestScoreMs = PersistenceManager.Instance.GetBestScore();
-
-        if (bestScoreMs <= 0)
-        {
-            bestScoreText.text = "Best: --:--.--";
-            return;
-        }
-
-        bestScoreText.text = "Best: " + FormatMilliseconds(bestScoreMs);
+        bestScoreText.text = "Best: Loading...";
+        int bestScoreMs = await PersistenceManager.Instance.GetBestScore();
+        bestScoreText.text = "Best: " + ScoreUtils.FormatMilliseconds(bestScoreMs);
     }
 
     void UpdatePlayerNameDisplay()
@@ -58,16 +53,6 @@ public class ClockManager : MonoBehaviour
         int minutes = Mathf.FloorToInt(timeSeconds / 60f);
         int seconds = Mathf.FloorToInt(timeSeconds % 60f);
         int milliseconds = Mathf.FloorToInt((timeSeconds * 100f) % 100f);
-
-        return $"{minutes:00}:{seconds:00}.{milliseconds:00}";
-    }
-
-    // Formats int milliseconds → MM:SS.xx
-    string FormatMilliseconds(int ms)
-    {
-        int minutes = ms / 60000;
-        int seconds = (ms / 1000) % 60;
-        int milliseconds = (ms / 10) % 100;
 
         return $"{minutes:00}:{seconds:00}.{milliseconds:00}";
     }

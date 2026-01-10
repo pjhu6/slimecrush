@@ -54,15 +54,6 @@ public class MainMenuController : MonoBehaviour
         PostLogin();
     }
 
-    public async void ResetData()
-    {
-        // TODO: for debug purposes only. Note leaderboard can only be reset from UGS dashboard
-        PersistenceManager.Instance.ResetData();
-        profileText.text = "";
-        profileCreate.SetActive(true);
-        Debug.Log("Player data reset.");
-    }
-
     private void PostLogin()
     {
         profileText.text = PersistenceManager.Instance.GetPlayerName();

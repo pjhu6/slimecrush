@@ -5,13 +5,21 @@ using Unity.Services.Core;
 using Unity.Services.Authentication;
 using Unity.Services.Leaderboards;
 using Unity.Services.Leaderboards.Models;
+using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 public class PersistenceManager : MonoBehaviour
 {
     public static PersistenceManager Instance { get; private set; }
 
-    private const string leaderboardId = "SlimeCrush";
+    [Header("Dev Settings")]
+    [SerializeField] private bool isDevMode = false;
+    [SerializeField] private Button resetButton;
+
+    private const string devLeaderboardId = "SlimeCrushDev";
+    private const string prodLeaderboardId = "SlimeCrush";
     private const string BestScoreKey = "BestScoreNew";
+    private string leaderboardId => isDevMode ? devLeaderboardId : prodLeaderboardId;
 
     public async void Awake()
     {
@@ -27,6 +35,20 @@ public class PersistenceManager : MonoBehaviour
 
         await UnityServices.InitializeAsync();
         await SignIn();  // Always sign in first, player name can change later
+    }
+
+    void Start()
+    {
+        // Dev mode
+        if (isDevMode)
+        {
+            resetButton.gameObject.SetActive(true);
+            resetButton.onClick.AddListener(() => _ = ResetData());
+        }
+        else
+        {
+            resetButton.gameObject.SetActive(false);
+        }
     }
 
     // Local data getters/setters
@@ -63,10 +85,6 @@ public class PersistenceManager : MonoBehaviour
 
     public async Task SetBestScore(int score)
     {
-        PlayerPrefs.SetInt(BestScoreKey, score);
-        PlayerPrefs.Save();
-        Debug.Log($"New Best Score saved locally: {score}");
-
         // Save best score in leaderboard
         if (AuthenticationService.Instance.IsSignedIn)
         {
@@ -83,18 +101,42 @@ public class PersistenceManager : MonoBehaviour
         
     }
 
-    public int GetBestScore()
+    public async Task<int> GetBestScore()
     {
-        return PlayerPrefs.GetInt(BestScoreKey);
+        if (!AuthenticationService.Instance.IsSignedIn) return int.MaxValue;
+
+        try
+        {
+            var scoreResponse = await LeaderboardsService.Instance.GetPlayerScoreAsync(leaderboardId);
+            Debug.Log("Fetched score from cloud.");
+            return (int)scoreResponse.Score;
+        }
+        catch (System.Exception)
+        {
+            // Return max value int will represent no score
+            return int.MaxValue; 
+        }
     }
 
-    public bool HasBestScore()
+    public async Task<bool> HasBestScore()
     {
-        return PlayerPrefs.HasKey(BestScoreKey);
+        if (!AuthenticationService.Instance.IsSignedIn) return false;
+
+        try
+        {
+            var scoreResponse = await LeaderboardsService.Instance.GetPlayerScoreAsync(leaderboardId);
+            return scoreResponse != null;
+        }
+        catch (System.Exception)
+        {
+            return false;
+        }
     }
 
     public async Task ResetData()
     {
+        // TODO: for debug purposes only. Note leaderboard can only be reset from UGS dashboard
+        SceneManager.LoadScene("MainMenuScene");
         AuthenticationService.Instance.SignOut();
         PlayerPrefs.DeleteAll();
         AuthenticationService.Instance.ClearSessionToken();

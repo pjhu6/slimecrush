@@ -43,8 +43,11 @@ public class LeaderboardManager : MonoBehaviour
                 // New prefab for each row
                 foreach (var entry in scores)
                 {
+                    int score = (int)entry.Score;
+                    int stars = ScoreUtils.GetStarsFromScore(score);
+                    
                     LeaderboardRow newRow = Instantiate(rowPrefab, scrollContent);
-                    newRow.Initialize(entry.Rank, entry.PlayerName, (int)entry.Score);
+                    newRow.Initialize(entry.Rank, entry.PlayerName, score, stars);
                 }
             }
             loadingText.gameObject.SetActive(false);
