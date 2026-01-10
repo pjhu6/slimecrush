@@ -103,7 +103,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   shakeDelay: 0.5
   breakDelay: 1
-  shakeMagnitude: 0.05
+  respawnDelay: 2
+  shakeMagnitude: 0.15
 --- !u!60 &4523177476148718741
 PolygonCollider2D:
   m_ObjectHideFlags: 0

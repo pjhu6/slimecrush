@@ -13723,7 +13723,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7220016046302201861, guid: 73fa3199c60bbe04e8f6fda6748fcc8c, type: 3}
       propertyPath: isDebug
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 7220016046302201861, guid: 73fa3199c60bbe04e8f6fda6748fcc8c, type: 3}
       propertyPath: hookLine

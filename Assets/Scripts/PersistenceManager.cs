@@ -40,6 +40,8 @@ public class PersistenceManager : MonoBehaviour
     void Start()
     {
         // Dev mode
+        // TODO: add a position to load in player for each level
+        // Call player object with setposition on scene load
         if (isDevMode)
         {
             resetButton.gameObject.SetActive(true);
@@ -154,7 +156,7 @@ public class PersistenceManager : MonoBehaviour
         {
             var scoresResponse = await LeaderboardsService.Instance.GetScoresAsync(
                 leaderboardId, 
-                new GetScoresOptions { Limit = 10 }
+                new GetScoresOptions { Limit = 50 }  // TODO pageinate leaderboard 
             );
 
             Debug.Log("Fetched leaderboard data successfully.");
