@@ -44,10 +44,9 @@ public class LeaderboardManager : MonoBehaviour
                 foreach (var entry in scores)
                 {
                     int score = (int)entry.Score;
-                    int stars = ScoreUtils.GetStarsFromScore(score);
                     
                     LeaderboardRow newRow = Instantiate(rowPrefab, scrollContent);
-                    newRow.Initialize(entry.Rank, entry.PlayerName, score, stars);
+                    newRow.Initialize(entry.Rank, entry.PlayerName, score);
                 }
             }
             loadingText.gameObject.SetActive(false);
