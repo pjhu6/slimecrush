@@ -28,44 +28,34 @@ public class PersistenceManager : MonoBehaviour
 
     public async void Awake()
     {
-        if (Instance != null && Instance != this)
-        {
-            Destroy(gameObject);
-            return;
-        }
-
+        if (Instance != null && Instance != this) { Destroy(gameObject); return; }
         Instance = this;
-
         DontDestroyOnLoad(gameObject);
 
+        // 1. Initialize the SDK
         await UnityServices.InitializeAsync();
 
-        PlayerAccountService.Instance.SignedIn += OnUnityAccountSignedIn;
-
-
-        // TODO: create callback to display loading while fetching existing sesion
-        if (AuthenticationService.Instance.SessionTokenExists)
+        // If we have a cached session, try to sign in.
+        if (AuthenticationService.Instance.SessionTokenExists && !AuthenticationService.Instance.IsSignedIn)
         {
             try 
             {
-                // This attempts to sign in using the stored token automatically
                 await AuthenticationService.Instance.SignInAnonymouslyAsync();
-                
-                // If the user was previously a Unity User, we should also ensure 
-                // the name is refreshed from the cloud.
-                if (HasUnityID())
-                {
-                    await AuthenticationService.Instance.GetPlayerNameAsync();
-                }
-
-                Debug.Log("Session resumed for Player: " + AuthenticationService.Instance.PlayerId);
-                OnLoginComplete?.Invoke();
+                Debug.Log($"[CACHE RESTORED] Signed in as PlayerID: {AuthenticationService.Instance.PlayerId}");
+                Debug.Log($"[CACHE RESTORED] Player Name: {AuthenticationService.Instance.PlayerName}");
             }
-            catch (Exception ex)
+            catch (Exception e)
             {
-                Debug.LogWarning("Could not resume session: " + ex.Message);
-                // If token is expired or invalid, we do nothing and let the UI show the login screen
+                Debug.Log($"No cached session to restore: {e.Message}");
             }
+        }
+
+        PlayerAccountService.Instance.SignedIn += OnUnityAccountSignedIn;
+
+        // This will now fire accurately because we awaited the sign-in above
+        if (AuthenticationService.Instance.IsSignedIn)
+        {
+            OnLoginComplete?.Invoke();
         }
     }
 
@@ -119,8 +109,20 @@ public class PersistenceManager : MonoBehaviour
             // 2. Player is authenticated, but does not yet have a Unity ID linked, so let's link
             else if (!HasUnityID())
             {
-                // If already signed in anonymously, link progress
-                await AuthenticationService.Instance.LinkWithUnityAsync(accessToken);
+                try 
+                {
+                    // Attempt to link the current anonymous session to this Unity account
+                    await AuthenticationService.Instance.LinkWithUnityAsync(accessToken);
+                }
+                catch (AuthenticationException ex) when (ex.ErrorCode == AuthenticationErrorCodes.AccountAlreadyLinked)
+                {
+                    // REDIRECT LOGIC: The Unity account belongs to someone else.
+                    // We must sign out of the current anonymous ID and sign in as the Unity ID user.
+                    Debug.Log("This Unity Account is already linked to another player. Switching identities...");
+                    
+                    AuthenticationService.Instance.SignOut(); 
+                    await AuthenticationService.Instance.SignInWithUnityAsync(accessToken);
+                }
             }
             // 3. Player has authentication and a Unity ID
             else
@@ -180,7 +182,10 @@ public class PersistenceManager : MonoBehaviour
 
     public bool IsSignedInToUnity()
     {
-        return PlayerAccountService.Instance.IsSignedIn;
+        // Check if the current player identity has a Unity ID attached to it
+        if (!AuthenticationService.Instance.IsSignedIn) return false;
+        
+        return !string.IsNullOrEmpty(AuthenticationService.Instance.PlayerInfo.GetUnityId());
     }
 
     public bool HasPlayerName()
@@ -238,15 +243,28 @@ public class PersistenceManager : MonoBehaviour
         }
     }
 
-    public async Task ResetData()
+    public void SignOut()
     {
-        // TODO: for debug purposes only. Note leaderboard can only be reset from UGS dashboard
+        Debug.Log("Signing out and clearing session cache");
+
+        // 1. Sign out of the current active session
         AuthenticationService.Instance.SignOut();
 
+        // 2. Sign out of the Unity Player Account service
         if (PlayerAccountService.Instance.IsSignedIn)
         {
             PlayerAccountService.Instance.SignOut();
         }
+
+        // Delete the token from the device's storage
+        // Without this, the next anonymous login will restore the old ID
+        AuthenticationService.Instance.ClearSessionToken();
+    }
+
+    public async Task ResetData()
+    {
+        // TODO: for debug purposes only. Note leaderboard can only be reset from UGS dashboard
+        SignOut();
 
         PlayerPrefs.DeleteAll();
         AuthenticationService.Instance.ClearSessionToken();

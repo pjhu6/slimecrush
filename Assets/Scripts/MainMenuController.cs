@@ -11,6 +11,7 @@ public class MainMenuController : MonoBehaviour
     [SerializeField] private TMP_InputField profileNameField;
     [SerializeField] private TMP_Text profileText;
     [SerializeField] private Button signInButton;
+    [SerializeField] private Button signOutButton;
     [SerializeField] private TMP_Text signedInText;
 
 
@@ -85,6 +86,14 @@ public class MainMenuController : MonoBehaviour
         PersistenceManager.Instance.StartUnityLogin();
     }
 
+    public void SignOut()
+    {
+        PersistenceManager.Instance.SignOut();
+        profileCreate.SetActive(true);
+        profileText.text = "";
+        HandleUnitySignInStatus();
+    }
+
     private void FinalizeProfile()
     {
         profileText.text = PersistenceManager.Instance.GetPlayerName();
@@ -97,12 +106,14 @@ public class MainMenuController : MonoBehaviour
         {
             Debug.Log("Handle sign in status, IsSignedInToUnity = true");
             signInButton.gameObject.SetActive(false);
+            signOutButton.gameObject.SetActive(true);
             signedInText.gameObject.SetActive(true);
         }
         else
         {
             Debug.Log("Handle sign in status, IsSignedInToUnity = false");
             signInButton.gameObject.SetActive(true);
+            signOutButton.gameObject.SetActive(false);
             signedInText.gameObject.SetActive(false);
         }
     }
@@ -112,6 +123,7 @@ public class MainMenuController : MonoBehaviour
     {
         // If existing Unity account: skip profile create screen
         // If new Unity account, leave the profile create screen up to choose a name
+        Debug.Log("HandleUnitySignIn()");
         if (PersistenceManager.Instance.HasPlayerName())
         {
             Debug.Log("Handle sign in status, has player name");
