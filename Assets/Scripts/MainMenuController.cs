@@ -14,9 +14,14 @@ public class MainMenuController : MonoBehaviour
     [SerializeField] private Button signOutButton;
     [SerializeField] private TMP_Text signedInText;
 
+    [Header("Levels")]
+    [SerializeField] private GameObject levelView;
 
     void Start()
     {
+        // Disable level select view
+        levelView.SetActive(false);
+        
         PersistenceManager.Instance.OnLoginComplete += HandleUnitySignIn;
 
         // Check if we already have a full session (Name + Auth) from previous run
@@ -34,7 +39,7 @@ public class MainMenuController : MonoBehaviour
 
     public void StartGame()
     {
-        SceneManager.LoadScene("GameScene");
+        levelView.SetActive(true);
     }
 
     // TODO create sign out button
@@ -102,20 +107,22 @@ public class MainMenuController : MonoBehaviour
 
     private void HandleUnitySignInStatus()
     {
-        if (PersistenceManager.Instance.IsSignedInToUnity())
-        {
-            Debug.Log("Handle sign in status, IsSignedInToUnity = true");
-            signInButton.gameObject.SetActive(false);
-            signOutButton.gameObject.SetActive(true);
-            signedInText.gameObject.SetActive(true);
-        }
-        else
-        {
-            Debug.Log("Handle sign in status, IsSignedInToUnity = false");
-            signInButton.gameObject.SetActive(true);
-            signOutButton.gameObject.SetActive(false);
-            signedInText.gameObject.SetActive(false);
-        }
+        // if (PersistenceManager.Instance.IsSignedInToUnity())
+        // {
+        //     Debug.Log("Handle sign in status, IsSignedInToUnity = true");
+        //     signInButton.gameObject.SetActive(false);
+        //     signOutButton.gameObject.SetActive(true);
+        //     signedInText.gameObject.SetActive(true);
+        // }
+        // else
+        // {
+        //     Debug.Log("Handle sign in status, IsSignedInToUnity = false");
+        //     signInButton.gameObject.SetActive(true);
+        //     signOutButton.gameObject.SetActive(false);
+        //     signedInText.gameObject.SetActive(false);
+        // }
+
+        // TODO: do nothing for now
     }
 
     // This method is specifically for when login callback is invoked

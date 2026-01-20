@@ -21,10 +21,7 @@ public class PersistenceManager : MonoBehaviour
     // Trigger this event when login (either type) is finished
     public event Action OnLoginComplete;
 
-    private const string devLeaderboardId = "SlimeCrushDev";
-    private const string prodLeaderboardId = "SlimeCrush";
     private const string BestScoreKey = "BestScoreNew";
-    private string leaderboardId => isDevMode ? devLeaderboardId : prodLeaderboardId;
 
     public async void Awake()
     {
@@ -193,7 +190,7 @@ public class PersistenceManager : MonoBehaviour
         return !string.IsNullOrEmpty(AuthenticationService.Instance.PlayerName);
     }
 
-    public async Task SetBestScore(int score)
+    public async Task SetBestScore(int score, string leaderboardId)
     {
         // Save best score in leaderboard
         if (AuthenticationService.Instance.IsSignedIn)
@@ -201,7 +198,7 @@ public class PersistenceManager : MonoBehaviour
             try
             {
                 await LeaderboardsService.Instance.AddPlayerScoreAsync(leaderboardId, score);
-                Debug.Log("Score submitted to UGS cloud leaderboard.");
+                Debug.Log("Score submitted to UGS cloud leaderboard for leaderboard: " + leaderboardId);
             }
             catch (System.Exception e)
             {
@@ -211,7 +208,7 @@ public class PersistenceManager : MonoBehaviour
 
     }
 
-    public async Task<int> GetBestScore()
+    public async Task<int> GetBestScore(string leaderboardId)
     {
         if (!AuthenticationService.Instance.IsSignedIn) return int.MaxValue;
 
@@ -225,21 +222,6 @@ public class PersistenceManager : MonoBehaviour
         {
             // Return max value int will represent no score
             return int.MaxValue;
-        }
-    }
-
-    public async Task<bool> HasBestScore()
-    {
-        if (!AuthenticationService.Instance.IsSignedIn) return false;
-
-        try
-        {
-            var scoreResponse = await LeaderboardsService.Instance.GetPlayerScoreAsync(leaderboardId);
-            return scoreResponse != null;
-        }
-        catch (System.Exception)
-        {
-            return false;
         }
     }
 
@@ -272,7 +254,7 @@ public class PersistenceManager : MonoBehaviour
         SceneManager.LoadScene("MainMenuScene");
     }
 
-    public async Task<List<LeaderboardEntry>> GetLeaderboardData()
+    public async Task<List<LeaderboardEntry>> GetLeaderboardData(string leaderboardId)
     {
         if (!AuthenticationService.Instance.IsSignedIn)
         {
@@ -300,5 +282,17 @@ public class PersistenceManager : MonoBehaviour
     {
         // TODO: implement datastore
         return 0;
+    }
+
+    public bool IsDevMode 
+    {
+        get 
+        {
+            #if UNITY_EDITOR
+                return isDevMode;
+            #else
+                return false; // Always false in the actual game build
+            #endif
+        }
     }
 }

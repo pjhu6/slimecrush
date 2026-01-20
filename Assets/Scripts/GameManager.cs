@@ -19,8 +19,7 @@ public class GameManager : MonoBehaviour
     public GameState CurrentState { get; private set; } = GameState.Playing;
 
     [Header("Levels")]
-    [SerializeField] public int CurrentLevel { get; private set; }  // TODO: set on level load
-    [SerializeField] private GameLevel[] levels;
+    [SerializeField] private LevelData levelData;
 
     private ClockManager clockManager;
 
@@ -35,11 +34,17 @@ public class GameManager : MonoBehaviour
         }
 
         clockManager = FindFirstObjectByType<ClockManager>();
-        CurrentLevel = PersistenceManager.Instance.GetPlayerCurrentLevel();
+        string leaderboardId = ScoreUtils.GetLeaderboardIdForLevel(levelData.currentLevel, PersistenceManager.Instance.IsDevMode);
+        clockManager.UpdateBestScoreDisplay(leaderboardId);
 
-        // TODO incremental load if needed
-        LoadAllLevels();
-        PlacePlayerStartingPosition(CurrentLevel);
+        // Load level
+        if (levelData.currentLevel == null)
+        {
+            Debug.LogError("No level data found");
+            return;
+        }
+
+        LoadLevel(levelData.currentLevel);
         
         Instance = this;
     }
@@ -76,8 +81,10 @@ public class GameManager : MonoBehaviour
     {
         yield return new WaitForSeconds(0.5f);
 
+        string leaderboardId = ScoreUtils.GetLeaderboardIdForLevel(levelData.currentLevel, PersistenceManager.Instance.IsDevMode);
+
         // Fetch best score from cloud
-        var getScoreTask = PersistenceManager.Instance.GetBestScore();
+        var getScoreTask = PersistenceManager.Instance.GetBestScore(leaderboardId);
         yield return new WaitUntil(() => getScoreTask.IsCompleted);
         int currentBest = getScoreTask.Result;
 
@@ -88,7 +95,7 @@ public class GameManager : MonoBehaviour
             Debug.Log($"New Best Score! {latestTimeMs} is better than {currentBest}");
 
             // Start task to save the new best score to cloud
-            var setScoreTask = PersistenceManager.Instance.SetBestScore(latestTimeMs);
+            var setScoreTask = PersistenceManager.Instance.SetBestScore(latestTimeMs, leaderboardId);
             yield return new WaitUntil(() => setScoreTask.IsCompleted);
 
             // Show the new best score screen
@@ -109,79 +116,17 @@ public class GameManager : MonoBehaviour
 
 
         // TODO cutscene in this scene, then next level
-        // UnityEngine.SceneManagement.SceneManager.LoadScene("WinScene");
-
-        GoToNextLevel();
+        UnityEngine.SceneManagement.SceneManager.LoadScene("WinScene");
     }
 
-    private void GoToNextLevel()
+    private void LoadLevel(GameLevel level)
     {
-        if (CurrentLevel >= levels.Length - 1)
-        {   
-            // TODO: final level, do something
-            Debug.Log($"{CurrentLevel} is final level.");
-            return;
-        }
+        Debug.Log($"Loading Level: {level.name}");
 
-        Debug.Log($"Moving from level {CurrentLevel} to {CurrentLevel + 1}");
-        CurrentLevel += 1;
+        // 2. Spawn the level prefab at 0, 0
+        Instantiate(level.levelPrefab, Vector3.zero, Quaternion.identity);
 
-        // TODO: give music source to gamelevel object
-        musicSource.Play();
-        // LoadLevel(currentLevel);
-        // PlacePlayerStartingPosition(currentLevel);
-    }
-
-    private void LoadAllLevels()
-    {
-        if (levels == null || levels.Length == 0)
-        {
-            Debug.LogWarning("No levels to load.");
-            return;
-        }
-
-        for (int i = 0; i < levels.Length; i++)
-        {
-            GameLevel level = levels[i];
-
-            if (level == null || level.levelPrefab == null)
-            {
-                Debug.LogWarning($"Level {i} is missing data or prefab.");
-                continue;
-            }
-
-            Instantiate(
-                level.levelPrefab,
-                new Vector3(0f, level.levelStartingY, 0f),
-                Quaternion.identity
-            );
-
-            Debug.Log($"Loaded level {i}");
-        }
-    }
-
-
-    private void LoadLevel(int levelIndex)
-    {
-        if (levelIndex < 0 || levelIndex >= levels.Length)
-            return;
-
-        GameLevel level = levels[levelIndex];
-
-        Instantiate(
-            level.levelPrefab,
-            new Vector3(0f, level.levelStartingY, 0f),
-            Quaternion.identity
-        );
-    }
-
-    private void PlacePlayerStartingPosition(int levelIndex)
-    {
-        if (levelIndex < 0 || levelIndex >= levels.Length)
-            return;
-
-        GameLevel level = levels[levelIndex];
-
+        // 3. Position the player
         GameObject player = GameObject.FindGameObjectWithTag("Player");
         if (player != null)
             player.transform.position = level.playerStartingPosition;

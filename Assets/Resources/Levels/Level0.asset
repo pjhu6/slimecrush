@@ -13,6 +13,6 @@ MonoBehaviour:
   m_Name: Level0
   m_EditorClassIdentifier: 
   levelName: Level0
-  playerStartingPosition: {x: 0, y: 95}
-  levelStartingY: 0
+  leaderboardId: SlimeCrush
+  playerStartingPosition: {x: 0, y: -0.9463}
   levelPrefab: {fileID: 6675640091006415143, guid: 96afb51f25991ac408667aa3d1acce9c, type: 3}

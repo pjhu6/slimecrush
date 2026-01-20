@@ -37,4 +37,16 @@ public static class ScoreUtils
     {
         return $"<mspace={width}>{text}</mspace>";
     }
+
+    public static string GetLeaderboardIdForLevel(GameLevel level, bool isDevMode)
+    {
+        if (level == null)
+        {
+            Debug.LogError("GetLeaderboardIdForLevel called with null level!");
+            return "";
+        }
+
+        // Hack, assume all dev leaderboards have "Dev" suffic
+        return isDevMode ? $"{level.leaderboardId}Dev" : level.leaderboardId;
+    }
 }

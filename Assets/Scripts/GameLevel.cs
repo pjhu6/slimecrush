@@ -4,7 +4,8 @@ using UnityEngine;
 public class GameLevel : ScriptableObject
 {
     public string levelName;
+    public string leaderboardId;
     public Vector2 playerStartingPosition;
-    public int levelStartingY;
+    // public int levelStartingY;
     public GameObject levelPrefab;
 }

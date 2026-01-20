@@ -15,7 +15,6 @@ public class ClockManager : MonoBehaviour
     async void Start()
     {
         UpdatePlayerNameDisplay();
-        await UpdateBestScoreDisplay();
     }
 
     void Update()
@@ -32,10 +31,10 @@ public class ClockManager : MonoBehaviour
         clockText.text = "Current: " + FormatTime(elapsedTime);
     }
 
-    async Task UpdateBestScoreDisplay()
+    public async Task UpdateBestScoreDisplay(string leaderboardId)
     {
         bestScoreText.text = "Best: Loading...";
-        int bestScoreMs = await PersistenceManager.Instance.GetBestScore();
+        int bestScoreMs = await PersistenceManager.Instance.GetBestScore(leaderboardId);
         bestScoreText.text = "Best: " + ScoreUtils.FormatMilliseconds(bestScoreMs);
     }
 

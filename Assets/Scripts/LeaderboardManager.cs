@@ -36,7 +36,8 @@ public class LeaderboardManager : MonoBehaviour
             }
 
             loadingText.gameObject.SetActive(true);
-            List<LeaderboardEntry> scores = await PersistenceManager.Instance.GetLeaderboardData();
+            // TODO: hard coded for now
+            List<LeaderboardEntry> scores = await PersistenceManager.Instance.GetLeaderboardData("SlimeCrushDev");
 
             if (scores != null)
             {
