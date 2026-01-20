@@ -17,7 +17,10 @@ public class GameManager : MonoBehaviour
 
     [Header("Game State")]
     public GameState CurrentState { get; private set; } = GameState.Playing;
-    public GameLevel CurrentLevel { get; set; }  // TODO: set on level load
+
+    [Header("Levels")]
+    [SerializeField] public int CurrentLevel { get; private set; }  // TODO: set on level load
+    [SerializeField] private GameLevel[] levels;
 
     private ClockManager clockManager;
 
@@ -32,6 +35,11 @@ public class GameManager : MonoBehaviour
         }
 
         clockManager = FindFirstObjectByType<ClockManager>();
+        CurrentLevel = PersistenceManager.Instance.GetPlayerCurrentLevel();
+
+        // TODO incremental load if needed
+        LoadAllLevels();
+        PlacePlayerStartingPosition(CurrentLevel);
         
         Instance = this;
     }
@@ -64,13 +72,7 @@ public class GameManager : MonoBehaviour
         musicSource.Stop();
     }
 
-    public void EndLevel()
-    {
-        // End the current level
-        StartCoroutine(EndLevelCoroutine());
-    }
-
-    private IEnumerator EndLevelCoroutine()
+    public IEnumerator EndLevelCoroutine()
     {
         yield return new WaitForSeconds(0.5f);
 
@@ -104,6 +106,84 @@ public class GameManager : MonoBehaviour
         }
 
         Resume();
-        UnityEngine.SceneManagement.SceneManager.LoadScene("WinScene");
+
+
+        // TODO cutscene in this scene, then next level
+        // UnityEngine.SceneManagement.SceneManager.LoadScene("WinScene");
+
+        GoToNextLevel();
+    }
+
+    private void GoToNextLevel()
+    {
+        if (CurrentLevel >= levels.Length - 1)
+        {   
+            // TODO: final level, do something
+            Debug.Log($"{CurrentLevel} is final level.");
+            return;
+        }
+
+        Debug.Log($"Moving from level {CurrentLevel} to {CurrentLevel + 1}");
+        CurrentLevel += 1;
+
+        // TODO: give music source to gamelevel object
+        musicSource.Play();
+        // LoadLevel(currentLevel);
+        // PlacePlayerStartingPosition(currentLevel);
+    }
+
+    private void LoadAllLevels()
+    {
+        if (levels == null || levels.Length == 0)
+        {
+            Debug.LogWarning("No levels to load.");
+            return;
+        }
+
+        for (int i = 0; i < levels.Length; i++)
+        {
+            GameLevel level = levels[i];
+
+            if (level == null || level.levelPrefab == null)
+            {
+                Debug.LogWarning($"Level {i} is missing data or prefab.");
+                continue;
+            }
+
+            Instantiate(
+                level.levelPrefab,
+                new Vector3(0f, level.levelStartingY, 0f),
+                Quaternion.identity
+            );
+
+            Debug.Log($"Loaded level {i}");
+        }
+    }
+
+
+    private void LoadLevel(int levelIndex)
+    {
+        if (levelIndex < 0 || levelIndex >= levels.Length)
+            return;
+
+        GameLevel level = levels[levelIndex];
+
+        Instantiate(
+            level.levelPrefab,
+            new Vector3(0f, level.levelStartingY, 0f),
+            Quaternion.identity
+        );
+    }
+
+    private void PlacePlayerStartingPosition(int levelIndex)
+    {
+        if (levelIndex < 0 || levelIndex >= levels.Length)
+            return;
+
+        GameLevel level = levels[levelIndex];
+
+        GameObject player = GameObject.FindGameObjectWithTag("Player");
+        if (player != null)
+            player.transform.position = level.playerStartingPosition;
     }
 }

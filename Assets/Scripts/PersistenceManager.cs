@@ -295,4 +295,10 @@ public class PersistenceManager : MonoBehaviour
             return null;
         }
     }
+
+    public int GetPlayerCurrentLevel()
+    {
+        // TODO: implement datastore
+        return 0;
+    }
 }

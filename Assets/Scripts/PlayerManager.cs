@@ -354,16 +354,19 @@ public class PlayerManager : MonoBehaviour
             HandleDeath();
         }
 
+
+        // TODO move win detection to platform, not player. Each win platform will detect if their win
+        // Has been detected already and which level to complete
         // Win game when above last platform
-        if (collision.gameObject.CompareTag("WinPlatform"))
-        {
-            Debug.Log("Collided with WinPlatform");
-            if (transform.DotTest(collision.transform, Vector2.down) 
-            && rb.Raycast(Vector2.down))  // check is grounded as well
-            {
-                GameManager.Instance.Win();
-            }
-        }
+        // if (collision.gameObject.CompareTag("WinPlatform"))
+        // {
+        //     Debug.Log("Collided with WinPlatform");
+        //     if (transform.DotTest(collision.transform, Vector2.down) 
+        //     && rb.Raycast(Vector2.down))  // check is grounded as well
+        //     {
+        //         GameManager.Instance.Win();
+        //     }
+        // }
     }
 
     private void HandleDeath()
@@ -635,6 +638,9 @@ public class PlayerManager : MonoBehaviour
 
     private IEnumerator VictorySequence()
     {
+        // Cache original camera size
+        float originalSize = mainCamera.orthographicSize;
+
         // 1. Play victory sound
         audioSource.PlayOneShot(victorySound);
 
@@ -642,21 +648,26 @@ public class PlayerManager : MonoBehaviour
         while (!IsHittingWall())
         {
             // Camera Zoom
-            mainCamera.orthographicSize = Mathf.Lerp(mainCamera.orthographicSize, 3f, Time.deltaTime);
+            mainCamera.orthographicSize =
+                Mathf.Lerp(mainCamera.orthographicSize, 3f, Time.deltaTime);
 
             // Move Right
             velocity.y = 0f;
             velocity.x = 2f;
 
-            Vector2 position = rb.position;
-            position += velocity * Time.deltaTime;
-            rb.MovePosition(position);
+            rb.MovePosition(rb.position + velocity * Time.deltaTime);
 
-            yield return null; 
+            yield return null;
         }
 
-        // 3. The Wall has been hit - end the level
+        // Stop movement
         velocity = Vector2.zero;
-        GameManager.Instance.EndLevel();
+
+        // 3. End level coroutine
+        yield return StartCoroutine(GameManager.Instance.EndLevelCoroutine());
+
+        // 4. Instantly reset camera size
+        mainCamera.orthographicSize = originalSize;
+        GameManager.Instance.Resume();
     }
 }
