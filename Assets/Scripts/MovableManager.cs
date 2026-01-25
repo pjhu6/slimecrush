@@ -1,67 +1,32 @@
 using UnityEngine;
 
-[RequireComponent(typeof(Rigidbody2D))]
 public class MovableManager : MonoBehaviour
 {
-    [Header("Movement")]
     public float moveSpeed = 2f;
     public float moveDistance = 5f;
 
     private Vector2 startPosition;
-    private Rigidbody2D rb;
-    private Vector2 platformVelocity;
-    
-    // Automatic Detection
-    private PlayerManager playerManager;
+    private Vector2 lastPosition;
+
+    public Vector2 Delta { get; private set; }
 
     void Start()
     {
-        rb = GetComponent<Rigidbody2D>();
-        rb.bodyType = RigidbodyType2D.Kinematic;
-        rb.interpolation = RigidbodyInterpolation2D.Interpolate;
         startPosition = transform.position;
+        lastPosition = startPosition;
     }
 
-    void FixedUpdate()
+    void Update()
     {
-        // Move platform
         float xOffset = Mathf.Sin(Time.time * moveSpeed) * moveDistance;
         Vector2 targetPosition = startPosition + new Vector2(xOffset, 0);
-        platformVelocity = (targetPosition - rb.position) / Time.fixedDeltaTime;
-        rb.MovePosition(targetPosition);
+
+        transform.position = targetPosition;
     }
 
     void LateUpdate()
     {
-        // Inject movement into Player
-        // We use LateUpdate because player movement happens first in FixedUpdate
-        // We then add/subtract to it using the platform velocity
-        if (playerManager != null)
-        {
-            Vector2 playerVelocity = playerManager.Velocity;
-            playerVelocity.x += platformVelocity.x;
-
-            playerManager.Velocity = playerVelocity;
-        }
-    }
-
-    private void OnCollisionEnter2D(Collision2D collision)
-    {
-        if (collision.gameObject.CompareTag("Player"))
-        {
-            // Normal.y < -0.7 ensure they are standing on top
-            if (collision.GetContact(0).normal.y < -0.7f)
-            {
-                playerManager = collision.gameObject.GetComponent<PlayerManager>();
-            }
-        }
-    }
-
-    private void OnCollisionExit2D(Collision2D collision)
-    {
-        if (collision.gameObject.CompareTag("Player"))
-        {
-            playerManager = null;
-        }
+        Delta = (Vector2)transform.position - lastPosition;
+        lastPosition = transform.position;
     }
 }
