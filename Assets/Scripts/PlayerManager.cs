@@ -48,6 +48,8 @@ public class PlayerManager : MonoBehaviour
     private Vector2 hookPoint;
     [SerializeField]
     private Vector2 hookVisualPoint;
+    [SerializeField] 
+    private Rigidbody2D grappledBody;
 
     public float jumpForce => (2f * maxJumpHeight) / (maxJumpTime / 2f);
     public float gravity => (-2f * maxJumpHeight) / Mathf.Pow((maxJumpTime / 2f), 2); 
@@ -160,6 +162,13 @@ public class PlayerManager : MonoBehaviour
         // Update sprite based on current state
         UpdateSprite();
         UpdateGrappleLine();
+    }
+
+    // For moving platforms to inject velocity
+    public Vector2 Velocity 
+    { 
+        get => velocity; 
+        set => velocity = value; 
     }
 
     private void UpdateGrappleLine()
@@ -567,12 +576,15 @@ public class PlayerManager : MonoBehaviour
         isGrappling = true;
 
         // Valid grapple: hit something, not a wall, AND hit the bottom of a collider
-        if (hit.collider != null &&
-            !hit.collider.CompareTag("Wall") &&
-            hit.normal.y < -0.5f)
+        if (hit.collider != null
+        && !hit.collider.CompareTag("Wall") 
+        && hit.normal.y < -0.5f)
         {
             audioSource.PlayOneShot(grappleSound);
             hookAttached = true;
+
+            grappledBody = hit.collider.attachedRigidbody;
+
             hookPoint = hit.point;
             hookVisualPoint = hit.point;
 
@@ -588,27 +600,33 @@ public class PlayerManager : MonoBehaviour
         }
     }
 
-
-
     private void GrappleMovement()
     {
+        if (grappledBody != null)
+        {
+            hookPoint += grappledBody.linearVelocity * Time.deltaTime;
+        }
+
         Vector2 toHook = hookPoint - rb.position;
         float distance = toHook.magnitude;
 
-        // Stop when close enough
         if (distance < 0.3f)
         {
-            velocity = Vector2.zero;
+            velocity = grappledBody ? grappledBody.linearVelocity : Vector2.zero;
             return;
         }
 
         Vector2 pullDir = toHook.normalized;
-
         velocity = pullDir * hookPullSpeed;
 
-        // Optional: swing control
+        // Optional swing control
         float horizontal = Input.GetAxis("Horizontal");
         velocity.x += horizontal * moveSpeed * 0.5f;
+
+        if (grappledBody != null)
+        {
+            velocity += grappledBody.linearVelocity;
+        }
     }
 
     private void ReleaseGrapple()
@@ -618,6 +636,7 @@ public class PlayerManager : MonoBehaviour
         isGrappling = false;
         hookAttached = false;
         hookLine.positionCount = 0;
+        grappledBody = null;
     }
 
     private IEnumerator RetractHook(float speed = 20f)
@@ -667,7 +686,7 @@ public class PlayerManager : MonoBehaviour
         yield return StartCoroutine(GameManager.Instance.EndLevelCoroutine());
 
         // 4. Instantly reset camera size
-        mainCamera.orthographicSize = originalSize;
-        GameManager.Instance.Resume();
+        // mainCamera.orthographicSize = originalSize;
+        // GameManager.Instance.Resume();
     }
 }

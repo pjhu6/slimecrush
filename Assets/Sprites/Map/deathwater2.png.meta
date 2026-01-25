@@ -129,12 +129,12 @@ TextureImporter:
       name: deathwater2_0
       rect:
         serializedVersion: 2
-        x: 124
-        y: 218
-        width: 484
-        height: 52
+        x: 125
+        y: 219
+        width: 280
+        height: 50
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -151,7 +151,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 
+    spriteID: b2932a90f16c0f14283034c5b299a621
     internalID: 0
     vertices: []
     indices: 
