@@ -17,6 +17,9 @@ public class MainMenuController : MonoBehaviour
     [Header("Levels")]
     [SerializeField] private GameObject levelView;
 
+    [Header("Leaderboard")]
+    [SerializeField] private GameObject leaderboardView;
+
     void Start()
     {
         // Disable level select view
@@ -97,6 +100,11 @@ public class MainMenuController : MonoBehaviour
         profileCreate.SetActive(true);
         profileText.text = "";
         HandleUnitySignInStatus();
+    }
+
+    public void OpenLeaderboard()
+    {
+        leaderboardView.SetActive(true);
     }
 
     private void FinalizeProfile()

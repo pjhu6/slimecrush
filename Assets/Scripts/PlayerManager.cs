@@ -48,8 +48,8 @@ public class PlayerManager : MonoBehaviour
     private Vector2 hookPoint;
     [SerializeField]
     private Vector2 hookVisualPoint;
-    [SerializeField] 
-    private Rigidbody2D grappledBody;
+    [SerializeField]
+    private MovableManager grappledPlatform;
 
     public float jumpForce => (2f * maxJumpHeight) / (maxJumpTime / 2f);
     public float gravity => (-2f * maxJumpHeight) / Mathf.Pow((maxJumpTime / 2f), 2); 
@@ -157,6 +157,13 @@ public class PlayerManager : MonoBehaviour
         && GameManager.Instance.CurrentState != GameState.Victory)
         {
             return;
+        }
+
+        // Follow moving platform, if applicable
+        if (hookAttached && grappledPlatform != null)
+        {
+            hookPoint += grappledPlatform.PlatformVelocity * Time.deltaTime;
+            hookVisualPoint = hookPoint;
         }
 
         // Update sprite based on current state
@@ -362,20 +369,6 @@ public class PlayerManager : MonoBehaviour
         {
             HandleDeath();
         }
-
-
-        // TODO move win detection to platform, not player. Each win platform will detect if their win
-        // Has been detected already and which level to complete
-        // Win game when above last platform
-        // if (collision.gameObject.CompareTag("WinPlatform"))
-        // {
-        //     Debug.Log("Collided with WinPlatform");
-        //     if (transform.DotTest(collision.transform, Vector2.down) 
-        //     && rb.Raycast(Vector2.down))  // check is grounded as well
-        //     {
-        //         GameManager.Instance.Win();
-        //     }
-        // }
     }
 
     private void HandleDeath()
@@ -577,19 +570,25 @@ public class PlayerManager : MonoBehaviour
 
         // Valid grapple: hit something, not a wall, AND hit the bottom of a collider
         if (hit.collider != null
-        && !hit.collider.CompareTag("Wall") 
-        && hit.normal.y < -0.5f)
+            && !hit.collider.CompareTag("Wall")
+            && hit.normal.y < -0.5f)
         {
             audioSource.PlayOneShot(grappleSound);
             hookAttached = true;
-
-            grappledBody = hit.collider.attachedRigidbody;
 
             hookPoint = hit.point;
             hookVisualPoint = hit.point;
 
             velocity = Vector2.zero;
             isDashing = false;
+
+            // Detect moving platform
+            grappledPlatform = hit.collider.GetComponent<MovableManager>();
+            if (grappledPlatform != null)
+            {
+                Debug.Log("Grappled moving platform");
+                grappledPlatform.AttachPlayer(this);
+            }
         }
         else
         {
@@ -602,19 +601,8 @@ public class PlayerManager : MonoBehaviour
 
     private void GrappleMovement()
     {
-        if (grappledBody != null)
-        {
-            hookPoint += grappledBody.linearVelocity * Time.deltaTime;
-        }
-
         Vector2 toHook = hookPoint - rb.position;
         float distance = toHook.magnitude;
-
-        if (distance < 0.3f)
-        {
-            velocity = grappledBody ? grappledBody.linearVelocity : Vector2.zero;
-            return;
-        }
 
         Vector2 pullDir = toHook.normalized;
         velocity = pullDir * hookPullSpeed;
@@ -622,21 +610,21 @@ public class PlayerManager : MonoBehaviour
         // Optional swing control
         float horizontal = Input.GetAxis("Horizontal");
         velocity.x += horizontal * moveSpeed * 0.5f;
-
-        if (grappledBody != null)
-        {
-            velocity += grappledBody.linearVelocity;
-        }
     }
 
     private void ReleaseGrapple()
     {
         if (!isGrappling) return;
 
+        if (grappledPlatform != null)
+        {
+            grappledPlatform.DetachPlayer(this);
+            grappledPlatform = null;
+        }
+
         isGrappling = false;
         hookAttached = false;
         hookLine.positionCount = 0;
-        grappledBody = null;
     }
 
     private IEnumerator RetractHook(float speed = 20f)

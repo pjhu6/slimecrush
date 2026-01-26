@@ -14,6 +14,9 @@ public class MovableManager : MonoBehaviour
     // Automatic Detection
     private PlayerManager playerManager;
 
+    // Expose platform velocity, player needs it to adjust grapple point
+    public Vector2 PlatformVelocity => platformVelocity;
+
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
@@ -49,8 +52,8 @@ public class MovableManager : MonoBehaviour
     {
         if (collision.gameObject.CompareTag("Player"))
         {
-            // Normal.y < -0.7 ensure they are standing on top
-            if (collision.GetContact(0).normal.y < -0.7f)
+            // Use DotTest to check if player is above
+            if (collision.transform.DotTest(transform, Vector2.down))
             {
                 playerManager = collision.gameObject.GetComponent<PlayerManager>();
             }
@@ -60,6 +63,20 @@ public class MovableManager : MonoBehaviour
     private void OnCollisionExit2D(Collision2D collision)
     {
         if (collision.gameObject.CompareTag("Player"))
+        {
+            playerManager = null;
+        }
+    }
+
+    public void AttachPlayer(PlayerManager player)
+    {
+        Debug.Log("Player attached to mover");
+        playerManager = player;
+    }
+
+    public void DetachPlayer(PlayerManager player)
+    {
+        if (playerManager == player)
         {
             playerManager = null;
         }

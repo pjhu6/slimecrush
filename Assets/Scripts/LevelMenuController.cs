@@ -8,11 +8,6 @@ public class LevelMenuController : MonoBehaviour
     [Header("Data Bridge")]
     [SerializeField] private LevelData levelData;
 
-
-    [Header("Levels")]
-    // [SerializeField] public int CurrentLevel { get; private set; }
-    [SerializeField] private GameLevel[] levels;
-
     [Header("UI References")]
     [SerializeField] private Button buttonPrefab;
     [SerializeField] private Transform container;
@@ -24,7 +19,7 @@ public class LevelMenuController : MonoBehaviour
 
     private void GenerateMenu()
     {
-        foreach (GameLevel level in levels)
+        foreach (GameLevel level in LevelsManager.Instance.Levels)
         {
             // 1. Spawn the button
             Button newButton = Instantiate(buttonPrefab, container);
