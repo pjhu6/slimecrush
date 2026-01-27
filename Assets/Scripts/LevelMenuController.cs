@@ -46,4 +46,9 @@ public class LevelMenuController : MonoBehaviour
         levelData.currentLevel = selectedLevel;
         SceneManager.LoadScene("GameScene");
     }
+
+    public void CloseLevelMenu()
+    {
+        gameObject.SetActive(false);
+    }
 }

@@ -39,10 +39,8 @@ public class LeaderboardManager : MonoBehaviour
         if (currentLevelIndex < LevelsManager.Instance.Levels.Length - 1)
         {
             currentLevelIndex++;
-            LoadLeaderboardData(LevelsManager.Instance.Levels[currentLevelIndex]);
+            UpdateLeaderboardByIndex(currentLevelIndex);
         }
-
-        UpdateNextPreviousButtons();
     }
 
     public void PreviousPage()
@@ -50,10 +48,8 @@ public class LeaderboardManager : MonoBehaviour
         if (currentLevelIndex > 0)
         {
             currentLevelIndex--;
-            LoadLeaderboardData(LevelsManager.Instance.Levels[currentLevelIndex]);
+            UpdateLeaderboardByIndex(currentLevelIndex);
         }
-
-        UpdateNextPreviousButtons();
     }
 
     public void CloseLeaderboard()
@@ -68,8 +64,7 @@ public class LeaderboardManager : MonoBehaviour
 
         if (isOpening)
         {
-            LoadLeaderboardData(LevelsManager.Instance.Levels[currentLevelIndex]);
-            UpdateNextPreviousButtons();
+            UpdateLeaderboardByIndex(currentLevelIndex);
         }
     }
 
@@ -108,5 +103,16 @@ public class LeaderboardManager : MonoBehaviour
     {
         previousPageButton.interactable = currentLevelIndex > 0;
         nextPageButton.interactable = currentLevelIndex < LevelsManager.Instance.Levels.Length - 1;
+    }
+
+    private void UpdateLeaderboardByIndex(int levelIndex)
+    {
+        LoadLeaderboardData(LevelsManager.Instance.Levels[levelIndex]);
+        UpdateNextPreviousButtons();
+    }
+
+    public void UpdateCurrentLeaderboard()
+    {
+        UpdateLeaderboardByIndex(currentLevelIndex);
     }
 }

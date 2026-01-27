@@ -19,6 +19,7 @@ public class MainMenuController : MonoBehaviour
 
     [Header("Leaderboard")]
     [SerializeField] private GameObject leaderboardView;
+    [SerializeField] private LeaderboardManager leaderboardManager;
 
     void Start()
     {
@@ -105,6 +106,7 @@ public class MainMenuController : MonoBehaviour
     public void OpenLeaderboard()
     {
         leaderboardView.SetActive(true);
+        leaderboardManager.UpdateCurrentLeaderboard();
     }
 
     private void FinalizeProfile()

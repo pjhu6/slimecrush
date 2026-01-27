@@ -6,6 +6,7 @@ public class MovableManager : MonoBehaviour
     [Header("Movement")]
     public float moveSpeed = 2f;
     public float moveDistance = 5f;
+    public float startOffset = 0f;
 
     private Vector2 startPosition;
     private Rigidbody2D rb;
@@ -28,7 +29,7 @@ public class MovableManager : MonoBehaviour
     void FixedUpdate()
     {
         // Move platform
-        float xOffset = Mathf.Sin(Time.time * moveSpeed) * moveDistance;
+        float xOffset = Mathf.Sin((Time.time + startOffset) * moveSpeed) * moveDistance;
         Vector2 targetPosition = startPosition + new Vector2(xOffset, 0);
         platformVelocity = (targetPosition - rb.position) / Time.fixedDeltaTime;
         rb.MovePosition(targetPosition);
