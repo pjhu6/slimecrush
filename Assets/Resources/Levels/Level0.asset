@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 61e6440e15d62a342985b16e7a02e5f8, type: 3}
   m_Name: Level0
   m_EditorClassIdentifier: 
-  levelName: Level0
+  levelName: 1 - First Step
   leaderboardId: SlimeCrush
   playerStartingPosition: {x: 0, y: -0.9463}
   levelPrefab: {fileID: 6675640091006415143, guid: 96afb51f25991ac408667aa3d1acce9c, type: 3}

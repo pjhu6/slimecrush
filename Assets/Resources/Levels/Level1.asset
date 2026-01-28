@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 61e6440e15d62a342985b16e7a02e5f8, type: 3}
   m_Name: Level1
   m_EditorClassIdentifier: 
-  levelName: Level1
+  levelName: 2 - The Heart Moves
   leaderboardId: SlimeCrush2
-  playerStartingPosition: {x: 0, y: 0}
+  playerStartingPosition: {x: 0, y: 40}
   levelPrefab: {fileID: 6675640091006415143, guid: 5f2559f644bbcbc4f9875e63854491f7, type: 3}
