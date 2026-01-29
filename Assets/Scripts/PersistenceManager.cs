@@ -256,6 +256,7 @@ public class PersistenceManager : MonoBehaviour
 
     public async Task<List<LeaderboardEntry>> GetLeaderboardData(string leaderboardId)
     {
+        Debug.Log($"Fetching leaderboard data for ID: {leaderboardId}");
         if (!AuthenticationService.Instance.IsSignedIn)
         {
             return null;
@@ -282,6 +283,28 @@ public class PersistenceManager : MonoBehaviour
     {
         // TODO: implement datastore
         return 0;
+    }
+
+    public async Task<LeaderboardEntry> GetPlayerLeaderboardEntry(string leaderboardId)
+    {
+        if (!AuthenticationService.Instance.IsSignedIn) return null;
+
+        try
+        {
+            // This retrieves the specific entry for the currently signed-in player
+            var entry = await LeaderboardsService.Instance.GetPlayerScoreAsync(leaderboardId);
+
+            // entry.Rank is usually 0-indexed (0 is 1st place). 
+            // entry.Score is the value.
+            Debug.Log($"Player Rank: {entry.Rank + 1} | Score: {entry.Score}");
+
+            return entry;
+        }
+        catch (System.Exception ex)
+        {
+            Debug.Log($"Error fetching player entry: {ex.Message}, probably the player has no score yet.");
+            return null;
+        }
     }
 
     public bool IsDevMode 

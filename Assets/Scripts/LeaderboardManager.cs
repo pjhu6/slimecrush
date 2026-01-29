@@ -13,6 +13,9 @@ public class LeaderboardManager : MonoBehaviour
     [SerializeField] private TMP_Text loadingText;
     [SerializeField] private Button nextPageButton;
     [SerializeField] private Button previousPageButton;
+    [SerializeField] private TMP_Text playerRankText;
+    [SerializeField] private TMP_Text playerScoreText;
+    [SerializeField] private TMP_Text playerNameText;
 
     [Header("Levels/Pagination")]
     [SerializeField] private int currentLevelIndex;
@@ -70,20 +73,22 @@ public class LeaderboardManager : MonoBehaviour
 
     private async void LoadLeaderboardData(GameLevel gameLevel)
     {
+        // 1. Clear existing entries
         foreach (Transform child in scrollContent)
         {
             Destroy(child.gameObject);
         }
 
         loadingText.gameObject.SetActive(true);
-
+        
+        // 2. Get all leaderboard data for level
         string leaderboardId = ScoreUtils.GetLeaderboardIdForLevel(gameLevel, PersistenceManager.Instance.IsDevMode);
 
-        // Set title
+        // 3. Set title
         LeaderboardTitle newTitle = Instantiate(titlePrefab, scrollContent);
         newTitle.Initialize(gameLevel.levelName);
 
-        // Set scores
+        // 4. Set scores
         List<LeaderboardEntry> scores = await PersistenceManager.Instance.GetLeaderboardData(leaderboardId);
         if (scores != null)
         {
@@ -96,6 +101,25 @@ public class LeaderboardManager : MonoBehaviour
                 newRow.Initialize(entry.Rank, entry.PlayerName, score);
             }
         }
+
+        // Get and set player rank/score
+        var playerEntry = await PersistenceManager.Instance.GetPlayerLeaderboardEntry(leaderboardId);
+
+        if (playerEntry != null)
+        {
+            // + 1 since rank is 0-indexed
+            playerNameText.text = PersistenceManager.Instance.GetPlayerName();
+            playerRankText.text = $"{playerEntry.Rank + 1}"; 
+            playerScoreText.text = $"{ScoreUtils.FormatMilliseconds((int)playerEntry.Score)}";
+        }
+        else
+        {
+            playerNameText.text = PersistenceManager.Instance.GetPlayerName();
+            playerRankText.text = "-";
+            playerScoreText.text = ScoreUtils.FormatMilliseconds(int.MaxValue);
+        }
+
+        // Set loading to false
         loadingText.gameObject.SetActive(false);
     }
 
