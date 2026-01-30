@@ -7,21 +7,15 @@ public class LevelButton : MonoBehaviour
     public TMP_Text levelNameText;
     public TMP_Text scoreText;
 
+    [Header("Star Settings")]
     [SerializeField] private Image[] starIcons;
+    [SerializeField] private Sprite filledStar;
+    [SerializeField] private Sprite emptyStar;
 
     private void Awake()
     {
-        HideAllStars();
-    }
-
-    private void HideAllStars()
-    {
-        for (int i = 0; i < starIcons.Length; i++)
-        {
-            Color c = starIcons[i].color;
-            c.a = 0f;
-            starIcons[i].color = c;
-        }
+        // Initialize by showing 0 stars (all empty)
+        SetStars(0);
     }
 
     public void SetLoading()
@@ -41,23 +35,10 @@ public class LevelButton : MonoBehaviour
         scoreText.text = "--:--.--";
         SetStars(0);
     }
-    
-    // TODO: if have emptyStar sprite
-    // private void SetStars(int score)
-    // {
-    //     int starsToShow = ScoreUtils.GetStarsFromScore(score);
 
-    //     for (int i = 0; i < starImages.Length; i++)
-    //     {
-    //         starImages[i].sprite = i < starsToShow
-    //             ? filledStar
-    //             : emptyStar;
-    //     }
-    // }
     private void SetStarsFromScore(int score)
     {
         int starsToShow = ScoreUtils.GetStarsFromScore(score);
-
         SetStars(starsToShow);
     }
 
@@ -65,9 +46,13 @@ public class LevelButton : MonoBehaviour
     {
         for (int i = 0; i < starIcons.Length; i++)
         {
-            Color c = starIcons[i].color;
-            c.a = i < count ? 1f : 0f;
-            starIcons[i].color = c;
+            // 1. Swap the sprite based on the count
+            starIcons[i].sprite = (i < count) ? filledStar : emptyStar;
+
+            // // 2. Ensure the image is fully visible (in case it was previously hidden via alpha)
+            // Color c = starIcons[i].color;
+            // c.a = 1f; 
+            // starIcons[i].color = c;
         }
     }
 }

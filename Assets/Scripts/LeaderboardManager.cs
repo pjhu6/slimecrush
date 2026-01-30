@@ -78,6 +78,9 @@ public class LeaderboardManager : MonoBehaviour
         {
             Destroy(child.gameObject);
         }
+        playerNameText.text = "";
+        playerRankText.text = "";
+        playerScoreText.text = "";
 
         loadingText.gameObject.SetActive(true);
         
