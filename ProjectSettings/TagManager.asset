@@ -9,6 +9,7 @@ TagManager:
   - WinPlatform
   - Breakable
   - Wall
+  - MovingPlatform
   layers:
   - Default
   - TransparentFX

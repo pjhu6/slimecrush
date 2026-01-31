@@ -73,6 +73,10 @@ public class PlayerManager : MonoBehaviour
     private bool isDashAvailable;
     [SerializeField]
     private bool facingRight;
+
+    [Header("Moving Platform")]
+    [SerializeField] private MovableManager currentPlatform;
+    private Vector2 platformDelta;
     
 
     [SerializeField]
@@ -134,6 +138,14 @@ public class PlayerManager : MonoBehaviour
 
         if (isGrounded)
         {
+            RaycastHit2D hit = rb.GetRaycastHit(Vector2.down);
+
+            if (hit.collider != null && hit.collider.CompareTag("MovingPlatform"))
+            {
+                currentPlatform = hit.collider.GetComponent<MovableManager>();
+                Debug.Log("Grounded on movable, currentPlatform=null? " + (currentPlatform == null));
+            }
+
             isGrappleAvailable = true;
             if (!wasGrounded)
             {
@@ -143,6 +155,7 @@ public class PlayerManager : MonoBehaviour
         }
         else
         {
+            currentPlatform = null;
             AirMovement();
         }
 
@@ -160,11 +173,11 @@ public class PlayerManager : MonoBehaviour
         }
 
         // Follow moving platform, if applicable
-        if (hookAttached && grappledPlatform != null)
-        {
-            hookPoint += grappledPlatform.PlatformVelocity * Time.deltaTime;
-            hookVisualPoint = hookPoint;
-        }
+        // if (hookAttached && grappledPlatform != null)
+        // {
+        //     hookPoint += grappledPlatform.PlatformVelocity * Time.deltaTime;
+        //     hookVisualPoint = hookPoint;
+        // }
 
         // Update sprite based on current state
         UpdateSprite();
@@ -347,10 +360,28 @@ public class PlayerManager : MonoBehaviour
             return;
         }
 
-        Vector2 position = rb.position;
-        position += velocity * Time.fixedDeltaTime;
+        Vector2 move = velocity * Time.fixedDeltaTime;
 
-        rb.MovePosition(position);
+        if (hookAttached && grappledPlatform != null)
+        {
+            // Move the anchor point by the exact amount the platform moved
+            hookPoint += grappledPlatform.Delta;
+            hookVisualPoint = hookPoint;
+        }
+
+        // Add moving platform delta if grounded OR if grappling to one
+        if ((isGrounded && currentPlatform != null))
+        {
+            move += currentPlatform.Delta;
+        }
+        else if (hookAttached && grappledPlatform != null)
+        {
+            // This ensures the player stays 'locked' in the same relative 
+            // position to the platform while the pull velocity is applied.
+            move += grappledPlatform.Delta;
+        }
+
+        rb.MovePosition(rb.position + move);
     }
 
     private void OnCollisionEnter2D(Collision2D collision)
@@ -587,7 +618,7 @@ public class PlayerManager : MonoBehaviour
             if (grappledPlatform != null)
             {
                 Debug.Log("Grappled moving platform");
-                grappledPlatform.AttachPlayer(this);
+                // grappledPlatform.AttachPlayer(this);
             }
         }
         else
@@ -618,7 +649,7 @@ public class PlayerManager : MonoBehaviour
 
         if (grappledPlatform != null)
         {
-            grappledPlatform.DetachPlayer(this);
+            // grappledPlatform.DetachPlayer(this);
             grappledPlatform = null;
         }
 

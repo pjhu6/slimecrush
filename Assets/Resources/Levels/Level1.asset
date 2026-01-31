@@ -14,5 +14,5 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   levelName: 2 - The Heart Moves
   leaderboardId: SlimeCrush2
-  playerStartingPosition: {x: -10, y: 90}
+  playerStartingPosition: {x: 0.66, y: 0}
   levelPrefab: {fileID: 6675640091006415143, guid: 5f2559f644bbcbc4f9875e63854491f7, type: 3}
