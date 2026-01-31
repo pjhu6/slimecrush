@@ -15,7 +15,7 @@ GameObject:
   - component: {fileID: 2224665217563263888}
   m_Layer: 0
   m_Name: movingplatform_medium_skinty_0
-  m_TagString: SolidGround
+  m_TagString: MovingPlatform
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0

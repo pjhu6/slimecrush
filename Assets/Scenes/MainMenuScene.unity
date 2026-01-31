@@ -3884,7 +3884,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 212a1be2f5e5d3846bfcd168a9c8be9f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  isDevMode: 1
+  isDevMode: 0
   resetButton: {fileID: 1015121083}
 --- !u!224 &1282110632 stripped
 RectTransform:
